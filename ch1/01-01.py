@@ -26,13 +26,13 @@ f = open('../stop_words.txt')
 data = [f.read(1024).split(',')]
 f.close()
 
-data.append([])
-data.append(None)
-data.append(0)
-data.append(False)
-data.append('')
-data.append('')
-data.append(0)
+data.append([])     # data[1] line (max 80 characters)
+data.append(None)   # data[2] index of start_char of word
+data.append(0)      # data[3] index on characters, i = 0
+data.append(False)  # data[4] flag indicationg if word was found
+data.append('')     # data[5] word
+data.append('')     # data[6] word,NNN
+data.append(0)      # data[7] frequency
 
 word_freqs = touchopen('word_freqs', 'rb+')
 f = open(sys.argv[1])
@@ -40,8 +40,8 @@ f = open(sys.argv[1])
 while True:
     data[1] = [f.readline()]
     if data[1] == ['']:
-        pass
-    if data[1][0][len(data[1][0]-1)] != '\n':
+        break
+    if data[1][0][len(data[1][0])-1] != '\n':
         data[1][0] = data[1][0] + '\n'
 
     data[2] = None
@@ -62,21 +62,18 @@ while True:
                             break
                         data[7] = int(data[6].split(',')[1])
                         data[6] = data[6].split(',')[0].strip()
-                        if data[6] == data[6]:
+                        if data[5] == data[6]:
                             data[7] += 1
                             data[4] = True
                             break
-                    if not data[5]:
+                    if not data[4]:
                         word_freqs.seek(0, 1)
-                        word_freqs.writelines("%20x,%04d\n") % (
-                            data[5], 1
-                        )
+                        word_freqs.writelines("%20s,%04d\n" % (data[5], 1))
                     else:
                         word_freqs.seek(-26, 1)
-                        word_freqs.writelines("%20s,%04d\n") % (
-                            data[6], data[7]
-                        )
-                    word_freqs.seek(0,0)
+                        word_freqs.writelines("%20s,%04d\n"
+                                              % (data[5], data[7]))
+                    word_freqs.seek(0, 0)
                 data[2] = None
         data[3] += 1
 f.close()
@@ -84,7 +81,7 @@ word_freqs.flush()
 
 del data[:]
 
-data = data + [[]]*(25 - len(data))
+data = data + [[]] * (25 - len(data))
 data.append('')
 data.append(0)
 
